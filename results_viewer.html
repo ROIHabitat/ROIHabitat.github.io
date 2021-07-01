@@ -107,11 +107,13 @@ var xmlFile = "results14";
 function loadDoc() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-    createImgs(this);
+    if (this.readyState == 4) {
+	    if (this.status == 200 || this.status == 0) {
+    		createImgs(this);
+	    }    
     }
   };
-  xhttp.open("GET", "https://github.com/ROIHabitat/ROIHabitat.github.io/blob/master/results14.xml", true);
+  xhttp.open("GET", "file:///C:Users/madtu/Box/WetlandProject/Batches/Batch14/results14.xml", true);
   xhttp.send();
 }
 
