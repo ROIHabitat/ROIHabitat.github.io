@@ -149,6 +149,12 @@ function createImgs(xml){
 		reject.type = 'checkbox';
 		reject.value = i;
 		reject.classList.add("reject");
+		
+		var bonusBox = document.createElement('input');
+		bonusBox.type = 'text';
+		bonusBox.value = 0;
+		bonusBox.classList.add("bonusbox");
+		bonusBox.setAttribute('onclick','this.select()');
 
 		var qcCanvas = document.createElement("canvas");
 		qcCanvas.id = "qcCanvas"+i;
