@@ -149,12 +149,6 @@ function createImgs(xml){
 		reject.type = 'checkbox';
 		reject.value = i;
 		reject.classList.add("reject");
-		
-		var bonusBox = document.createElement('input');
-		bonusBox.type = 'text';
-		bonusBox.value = 0;
-		bonusBox.classList.add("bonusbox");
-		bonusBox.setAttribute('onclick','this.select()');
 
 		var qcCanvas = document.createElement("canvas");
 		qcCanvas.id = "qcCanvas"+i;
@@ -179,7 +173,7 @@ function createImgs(xml){
 			
 		//Output table
 		var table="<table>"+
-		"<tr class='ctype'><td>CROP</td><td>" + 	xmltbl[i].getElementsByTagName("Answergrldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>CROP</td><td>" + 	xmltbl[i].getElementsByTagName("Answercroparea")[0].childNodes[0].nodeValue + "</td></tr>"+
 		"<tr class='ctype'><td>GRASS</td><td>" + 	xmltbl[i].getElementsByTagName("Answergrldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
 		"<tr class='ctype'><td>TREES</td><td>" + 	xmltbl[i].getElementsByTagName("Answertreearea")[0].childNodes[0].nodeValue + "</td></tr>"+
 		"<tr class='ctype'><td>WETLAND</td><td>"+ 	xmltbl[i].getElementsByTagName("Answerwtldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
