@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+#imageWrapper{
+	width: 610px;
+	padding: 25px 40px;
+}
+
+.imgHeader{
+	font-size:16px;
+	font-weight:bold;
+	height:18px;
+	top:0px;
+	position:relative;
+}
+
+.qc{
+	border: 5px solid black;
+	position: relative;
+	overflow:hidden;
+	box-sizing: content-box;
+	float: left;
+	margin-bottom: 20px;
+}
+
+.container{
+	height:750px;
+	margin: 20px 0px;
+}
+
+span{
+	position: absolute;
+	padding-left: 15px;
+}
+
+table, td{
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+td{padding:2px;}
+
+.newimg{
+	position:absolute;
+	height:100%;
+	width: 100%;
+	top: 0px;
+}
+
+.ctype{
+	font-weight:bold;
+}
+
+canvas{
+	position: absolute;
+	opacity: 0.33;
+}
+
+#output{
+	min-width:1000px;
+	max-width:1000px;
+	min-height:350px;
+	max-height:600px;
+}
+
+#generate{
+	background: green;
+    color: yellow;
+    border: 2px solid black;
+    width: 200px;
+    height: 40px;
+    font-size: 24px;
+    font-family: sans-serif;
+    padding-top: 6px;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bolder;
+	cursor:pointer;
+}
+
+#bonustbl{
+	margin: 10px 0px;
+}
+
+</style>
+
+<script>
+
+var qc, newimg;
+var cSize = 720;
+
+var activeCells = [];
+
+var responses = [];
+var workers = {};
+
+var colours = ["#D8D827", "#D88027", "#80EF44", "#ADD8E6"];
+
+	/**XML**/
+var xmlFile = "Results19_2";
+	/**XML**/
+
+
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+	    if (this.status == 200 || this.status == 0) {
+    		createImgs(this);
+	    }    
+    }
+  };
+  xhttp.open("GET", xmlFile+".xml", true);
+  xhttp.send();
+}
+
+
+function createImgs(xml){
+	var xmlDoc = xml.responseXML;
+	var xmltbl = xmlDoc.getElementsByTagName(xmlFile);
+	var gSize = 24
+	var imgsrc, imghdr;
+	var inc = cSize/(2*gSize);
+	var nswe = ["NW","SW","NE","SE"];
+	
+	for (var i=0; i < xmltbl.length; i++){
+		imgsrc = xmltbl[i].getElementsByTagName("Inputimg_url")[0].childNodes[0].nodeValue;
+
+		imghdr = document.createElement("div");
+		imghdr.classList.add('imgHeader')
+		imghdr.innerHTML = i + ")   " +xmltbl[i].getElementsByTagName("InputIMGKEY")[0].childNodes[0].nodeValue +" "+ xmltbl[i].getElementsByTagName("InputAGE")[0].childNodes[0].nodeValue + "  ---   " +	xmltbl[i].getElementsByTagName("HITId")[0].childNodes[0].nodeValue;
+		
+		var container = document.createElement("div");
+		container.classList.add("container");
+		var qc = document.createElement("div");
+		qc.id = "qc" + i;
+		qc.setAttribute('class','qc');
+		qc.style.width = cSize + 'px';
+		qc.style.height = cSize + 'px';
+
+		
+		var tblSpan = document.createElement("span");
+		tblSpan.id = "tbl"+i;
+		tblSpan.style.left = Number(cSize + 58) + 'px';
+		var reject = document.createElement('input');
+		reject.type = 'checkbox';
+		reject.value = i;
+		reject.classList.add("reject");
+		
+		var bonusBox = document.createElement('input');
+		bonusBox.type = 'text';
+		bonusBox.value = 0;
+		bonusBox.classList.add("bonusbox");
+		bonusBox.setAttribute('onclick','this.select()');
+
+		var qcCanvas = document.createElement("canvas");
+		qcCanvas.id = "qcCanvas"+i;
+		qcCanvas.width = cSize;
+		qcCanvas.height = cSize;
+		
+		newimg = document.createElement("img");
+		newimg.setAttribute('class','newimg');
+		newimg.src = imgsrc;
+		newimg.width = cSize;
+		newimg.height = cSize;
+		qc.appendChild(newimg);
+		
+		responses[i] = {
+			HIT: xmltbl[i].getElementsByTagName("HITId")[0].childNodes[0].nodeValue,
+			worker: xmltbl[i].getElementsByTagName("WorkerId")[0].childNodes[0].nodeValue,
+			assignment: xmltbl[i].getElementsByTagName("AssignmentId")[0].childNodes[0].nodeValue,
+			bonus: 0
+		}
+		
+		workers[responses[i].worker] = 0;
+			
+		//Output table
+		var table="<table>"+
+		"<tr><td>Worker</td><td>" + xmltbl[i].getElementsByTagName("WorkerId")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr><td>Approval</td><td>" +	xmltbl[i].getElementsByTagName("LifetimeApprovalRate")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr><td>Time</td><td>" + 	xmltbl[i].getElementsByTagName("WorkTimeInSeconds")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>CROP</td><td>" + 	xmltbl[i].getElementsByTagName("Answercroparea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>GRASS</td><td>" + 	xmltbl[i].getElementsByTagName("Answergrldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>TREES</td><td>" + 	xmltbl[i].getElementsByTagName("Answertreearea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>WETLAND</td><td>"+ 	xmltbl[i].getElementsByTagName("Answerwtldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr><td>TOTAL</td><td>" + 	xmltbl[i].getElementsByTagName("AnswerareaTotal")[0].childNodes[0].nodeValue + "</td></tr></table><br>REJECT<br>";
+
+		tblSpan.innerHTML = table;
+
+		document.getElementById("imageWrapper").appendChild(container);
+		container.appendChild(imghdr);
+		container.appendChild(qc);
+		container.appendChild(tblSpan);
+		tblSpan.appendChild(reject);
+		tblSpan.innerHTML += ("<br><br>Bonus:");
+		tblSpan.appendChild(bonusBox);
+
+		qc.appendChild(qcCanvas);
+		
+		
+		var ctx = qcCanvas.getContext("2d");
+		
+		activeCells[i] = [];
+		try {activeCells[i][0]= xmltbl[i].getElementsByTagName("Answercrop")[0].childNodes[0].nodeValue;} catch(e){activeCells[i][0]= "";}
+		try {activeCells[i][1]= xmltbl[i].getElementsByTagName("Answergrld")[0].childNodes[0].nodeValue;} catch(e){activeCells[i][1]= "";}
+		try {activeCells[i][2]= xmltbl[i].getElementsByTagName("Answertree")[0].childNodes[0].nodeValue;} catch(e){activeCells[i][2]= "";}
+		try {activeCells[i][3]= xmltbl[i].getElementsByTagName("Answerwtld")[0].childNodes[0].nodeValue;} catch(e){activeCells[i][3]= "";}
+
+		for (var c=0; c<4; c++){
+			for (var t=0; t<4; t++){
+				for (var x = 0; x < gSize; x++){
+					for (var y = 0; y < gSize; y++){
+						
+						var secName= (c+1) + String.fromCharCode(65+x) + String.fromCharCode(65+y);
+						
+						if (activeCells[i][t].indexOf(secName) >= 0){		
+						var xAdj = 0; 
+							var yAdj = 0;
+							if (nswe[c] == "SE" || nswe[c] == "SW") {yAdj = cSize/2;}
+							if (nswe[c] == "NE" || nswe[c] == "SE") {xAdj = cSize/2;}
+							var xpos = x*inc+xAdj;
+							var ypos = y*inc+yAdj;
+						
+							ctx.fillStyle = colours[t];
+							ctx.fillRect(xpos,ypos,inc,inc);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function makeTable(){
+	var output = document.getElementById("output");
+	var tblText = "HITId,AssignmentId,WorkerId,Approve,Reject\r";
+	for (var r=0; r < responses.length; r++){
+		tblText += responses[r].HIT +","+ responses[r].assignment +","+ responses[r].worker +",";
+		if (document.getElementsByClassName('reject')[r].checked){
+			tblText += "," + document.getElementById('reason').value + "\r";
+		} else 
+			{tblText += "x,\r";}
+	}
+		
+	output.innerHTML = tblText;
+	output.select();
+	document.execCommand("copy");
+	alert("Table copied. Paste into text file and save as .csv");
+}
+ 
+function bonuses(){
+	var bonuses = document.getElementsByClassName("bonusbox");
+		for (var r=0; r < bonuses.length; r++){
+			workers[responses[r].worker] += Number(bonuses[r].value);
+		}
+		
+	for (w in workers){
+		if (workers[w]>0){
+			document.getElementById("bonustbl").innerHTML += "<tr><td><a href='https://requester.mturk.com/workers/" +w+"' target='_blank' onmouseup='fade(this)'>"+w+"</a></td><td>"+workers[w]+"</td></tr>";
+		}
+	}
+}
+
+function fade(a){
+	a.style.color = "#0FF";
+	a.style.background = "black";
+}
+
+
+</script>
+</head>
+
+<body onLoad="loadDoc();">
+
+<div id="imageWrapper"></div>
+
+<input type="button" onclick="bonuses()" value="Calculate bonuses"/>
+<table id="bonustbl"></table>
+
+<div id="generate" onclick="makeTable()">Generate table</div><input id="reason" type="text" value="Poor classification"> <br/>
+<textarea id="output" readonly></textarea>
+
+
+</body>
+</html>
