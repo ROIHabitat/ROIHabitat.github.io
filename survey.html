@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Results</title>
+<title>Survey</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 
@@ -179,10 +179,7 @@ function createImgs(xml){
 			
 		//Output table
 		var table="<table>"+
-		"<tr><td>Worker</td><td>" + xmltbl[i].getElementsByTagName("WorkerId")[0].childNodes[0].nodeValue + "</td></tr>"+
-		"<tr><td>Approval</td><td>" +	xmltbl[i].getElementsByTagName("LifetimeApprovalRate")[0].childNodes[0].nodeValue + "</td></tr>"+
-		"<tr><td>Time</td><td>" + 	xmltbl[i].getElementsByTagName("WorkTimeInSeconds")[0].childNodes[0].nodeValue + "</td></tr>"+
-		"<tr class='ctype'><td>CROP</td><td>" + 	xmltbl[i].getElementsByTagName("Answercroparea")[0].childNodes[0].nodeValue + "</td></tr>"+
+		"<tr class='ctype'><td>CROP</td><td>" + 	"<tr class='ctype'><td>RED</td><td>" + "</td></tr>"+
 		"<tr class='ctype'><td>GRASS</td><td>" + 	xmltbl[i].getElementsByTagName("Answergrldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
 		"<tr class='ctype'><td>TREES</td><td>" + 	xmltbl[i].getElementsByTagName("Answertreearea")[0].childNodes[0].nodeValue + "</td></tr>"+
 		"<tr class='ctype'><td>WETLAND</td><td>"+ 	xmltbl[i].getElementsByTagName("Answerwtldarea")[0].childNodes[0].nodeValue + "</td></tr>"+
